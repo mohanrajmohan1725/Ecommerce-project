@@ -5,35 +5,49 @@ import {
   FaTimes,
   FaHeart,
   FaSearch,
+  FaUserCircle,
+  FaHome,
+  FaBoxOpen,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import CartDrawer from "./CartDrawer";
 import { SearchContext } from "../context/SearchContext";
+import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const { cart } = useContext(CartContext);
   const { search, setSearch } = useContext(SearchContext);
+  const { user, logout } = useContext(AuthContext);
 
   useEffect(() => {
     document.body.style.overflow = cartOpen ? "hidden" : "auto";
   }, [cartOpen]);
 
+  const userName = user?.email
+    ? user.email.split("@")[0].charAt(0).toUpperCase() +
+      user.email.split("@")[0].slice(1)
+    : "Guest";
+
   return (
     <>
-   <nav className="bg-white text-black px-4 md:px-6 py-4 sticky top-0 z-50 shadow-md transition-all duration-300">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <Link to="/" className="text-2xl font-bold">
-            MyShop
+      <nav className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 shadow-md border-b">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          {/* 🔥 LOGO */}
+          <Link to="/" className="flex items-center gap-2">
+            <img src="public/logo.png.png" className="w-12 h-12" />
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              MyShop
+            </span>
           </Link>
 
-          {/* 🔍 Search */}
-          <div className="hidden md:flex items-center bg-gray-100 px-3 py-2 rounded-lg w-1/3">
-            <FaSearch className="text-gray-500 mr-2" />
+          {/* 🔍 SEARCH */}
+          <div className="hidden md:flex items-center bg-gray-100 px-4 py-2 rounded-full w-1/3 shadow-sm focus-within:ring-2 ring-blue-400 transition">
+            <FaSearch className="text-gray-400 mr-2" />
             <input
               type="text"
               placeholder="Search products..."
@@ -43,66 +57,124 @@ function Navbar() {
             />
           </div>
 
-          {/* Icons */}
-          <div className="hidden md:flex items-center gap-6">
+          {/* 🧭 RIGHT SIDE */}
+          <div className="flex items-center gap-5">
+            {/* ❤️ Wishlist */}
             <Link
               to="/wishlist"
-              className="text-xl text-gray-600 hover:text-red-500 transition"
+              className="text-xl text-red-500 hover:scale-110 transition"
             >
               <FaHeart />
             </Link>
 
+            {/* 🛒 Cart */}
             <div
               onClick={() => setCartOpen(true)}
-              className={`relative text-xl cursor-pointer transition ${
-                cartOpen ? "text-blue-500" : "text-gray-600 hover:text-blue-500"
-              }`}
+              className="relative text-xl cursor-pointer hover:scale-110 transition"
             >
-              <FaShoppingCart />
-
-              <span className="absolute -top-2 -right-2 bg-black text-white text-xs px-1 rounded">
+              <FaShoppingCart className="text-blue-600" />
+              <span
+                className={`absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1 rounded-full 
+  ${cart.length > 0 ? "animate-bounceCart" : ""}`}
+              >
                 {cart.length}
               </span>
             </div>
-          </div>
 
-          {/* Mobile Menu */}
-          <div
-            className="md:hidden text-xl cursor-pointer"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? <FaTimes /> : <FaBars />}
+            {/* 👤 PROFILE */}
+            <div className="relative">
+              <div
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="cursor-pointer text-2xl"
+              >
+                <FaUserCircle />
+              </div>
+
+              {profileOpen && (
+                <div className="absolute right-0 mt-3 w-48 bg-white shadow-xl rounded-lg p-3 z-50">
+                  <p className="text-sm text-gray-600 border-b pb-2 mb-2">
+                    {userName}
+                  </p>
+
+                  <Link
+                    to="/profile"
+                    onClick={() => setProfileOpen(false)}
+                    className="block py-2 hover:text-blue-600"
+                  >
+                    Profile
+                  </Link>
+
+                  <Link
+                    to="/orders"
+                    onClick={() => setProfileOpen(false)}
+                    className="block py-2 hover:text-blue-600"
+                  >
+                    Orders
+                  </Link>
+
+                  <button
+                    onClick={logout}
+                    className="w-full text-left py-2 text-red-500 hover:text-red-700"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 📱 MOBILE MENU BUTTON */}
+            <div
+              className="md:hidden text-xl cursor-pointer"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              {menuOpen ? <FaTimes /> : <FaBars />}
+            </div>
           </div>
         </div>
 
-        {/* Mobile */}
+        {/* 📱 MOBILE MENU */}
         {menuOpen && (
-          <div className="md:hidden mt-4 flex flex-col gap-4 bg-gray-100 p-4 rounded-lg">
-            <div className="flex items-center bg-white px-3 py-2 rounded-lg">
-              <FaSearch className="text-gray-500 mr-2" />
+          <div className="md:hidden bg-white/95 backdrop-blur-md px-4 py-5 shadow-xl rounded-b-2xl animate-slideDown">
+            {/* 🔍 Search */}
+            <div className="flex items-center bg-gray-100 px-3 py-2 rounded-full mb-4">
+              <FaSearch className="text-gray-400 mr-2" />
               <input
                 type="text"
                 placeholder="Search..."
+                className="bg-transparent outline-none w-full text-sm"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="bg-transparent outline-none w-full"
               />
             </div>
 
-            <Link to="/" onClick={() => setMenuOpen(false)}>
-              Home
-            </Link>
-            <Link to="/wishlist" onClick={() => setMenuOpen(false)}>
-              Wishlist
-            </Link>
+            {/* 📱 Menu Items */}
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition"
+              >
+                <FaHome className="text-blue-600" />
+                <span className="font-medium">Home</span>
+              </Link>
 
-            <div
-              onClick={() => {
-                setCartOpen(true);
-                setMenuOpen(false);
-              }}
-            >
-              Cart
+              <Link
+                to="/wishlist"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition"
+              >
+                <FaHeart className="text-red-500" />
+                <span className="font-medium">Wishlist</span>
+              </Link>
+
+              <Link
+                to="/orders"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 transition"
+              >
+                <FaBoxOpen className="text-green-600" />
+                <span className="font-medium">Orders</span>
+              </Link>
             </div>
           </div>
         )}
