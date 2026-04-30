@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
 export const AuthContext = createContext();
@@ -17,8 +17,19 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  // 🔥 LOGOUT FUNCTION ADD PANNOM
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null); // 👈 VERY IMPORTANT (UI update)
+      console.log("Logout success");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

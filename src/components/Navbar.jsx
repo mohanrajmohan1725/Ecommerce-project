@@ -10,7 +10,7 @@ import {
   FaHome,
   FaBoxOpen,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import CartDrawer from "./CartDrawer";
 import { SearchContext } from "../context/SearchContext";
@@ -25,6 +25,8 @@ function Navbar() {
   const { search, setSearch } = useContext(SearchContext);
   const { user, logout } = useContext(AuthContext);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.body.style.overflow = cartOpen ? "hidden" : "auto";
   }, [cartOpen]);
@@ -34,19 +36,30 @@ function Navbar() {
       user.email.split("@")[0].slice(1)
     : "Guest";
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setProfileOpen(false);
+      navigate("/login"); // redirect after logout
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <>
       <nav className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 shadow-md border-b">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          {/* 🔥 LOGO */}
-          <Link to="/" className="flex items-center gap-2">
-  <img src={logo} className="w-12 h-12" />
-  <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-    MyShop
-  </span>
-</Link>
 
-          {/* 🔍 SEARCH */}
+          {/* LOGO */}
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logo} className="w-12 h-12" alt="logo" />
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              MyShop
+            </span>
+          </Link>
+
+          {/* SEARCH */}
           <div className="hidden md:flex items-center bg-gray-100 px-4 py-2 rounded-full w-1/3 shadow-sm focus-within:ring-2 ring-blue-400 transition">
             <FaSearch className="text-gray-400 mr-2" />
             <input
@@ -58,9 +71,10 @@ function Navbar() {
             />
           </div>
 
-          {/* 🧭 RIGHT SIDE */}
+          {/* RIGHT SIDE */}
           <div className="flex items-center gap-5">
-            {/* ❤️ Wishlist */}
+
+            {/* Wishlist */}
             <Link
               to="/wishlist"
               className="text-xl text-red-500 hover:scale-110 transition"
@@ -68,21 +82,18 @@ function Navbar() {
               <FaHeart />
             </Link>
 
-            {/* 🛒 Cart */}
+            {/* Cart */}
             <div
               onClick={() => setCartOpen(true)}
               className="relative text-xl cursor-pointer hover:scale-110 transition"
             >
               <FaShoppingCart className="text-blue-600" />
-              <span
-                className={`absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1 rounded-full 
-  ${cart.length > 0 ? "animate-bounceCart" : ""}`}
-              >
+              <span className={`absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-1 rounded-full ${cart.length > 0 ? "animate-bounceCart" : ""}`}>
                 {cart.length}
               </span>
             </div>
 
-            {/* 👤 PROFILE */}
+            {/* PROFILE */}
             <div className="relative">
               <div
                 onClick={() => setProfileOpen(!profileOpen)}
@@ -113,8 +124,9 @@ function Navbar() {
                     Orders
                   </Link>
 
+                  {/* 🔥 FIXED LOGOUT */}
                   <button
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="w-full text-left py-2 text-red-500 hover:text-red-700"
                   >
                     Logout
@@ -123,7 +135,7 @@ function Navbar() {
               )}
             </div>
 
-            {/* 📱 MOBILE MENU BUTTON */}
+            {/* MOBILE MENU BUTTON */}
             <div
               className="md:hidden text-xl cursor-pointer"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -133,10 +145,11 @@ function Navbar() {
           </div>
         </div>
 
-        {/* 📱 MOBILE MENU */}
+        {/* MOBILE MENU */}
         {menuOpen && (
           <div className="md:hidden bg-white/95 backdrop-blur-md px-4 py-5 shadow-xl rounded-b-2xl animate-slideDown">
-            {/* 🔍 Search */}
+
+            {/* SEARCH */}
             <div className="flex items-center bg-gray-100 px-3 py-2 rounded-full mb-4">
               <FaSearch className="text-gray-400 mr-2" />
               <input
@@ -148,33 +161,21 @@ function Navbar() {
               />
             </div>
 
-            {/* 📱 Menu Items */}
+            {/* MENU ITEMS */}
             <div className="flex flex-col gap-3">
-              <Link
-                to="/"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition"
-              >
+              <Link to="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50">
                 <FaHome className="text-blue-600" />
-                <span className="font-medium">Home</span>
+                Home
               </Link>
 
-              <Link
-                to="/wishlist"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition"
-              >
+              <Link to="/wishlist" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50">
                 <FaHeart className="text-red-500" />
-                <span className="font-medium">Wishlist</span>
+                Wishlist
               </Link>
 
-              <Link
-                to="/orders"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 transition"
-              >
+              <Link to="/orders" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-50">
                 <FaBoxOpen className="text-green-600" />
-                <span className="font-medium">Orders</span>
+                Orders
               </Link>
             </div>
           </div>
